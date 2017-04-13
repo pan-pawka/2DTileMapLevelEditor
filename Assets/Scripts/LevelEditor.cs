@@ -14,35 +14,18 @@ public class LevelEditor : MonoBehaviour {
 
 	const int EMPTY = -1;
 
-	private int[][] level = new int[][]
-	{
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-		new int[]{-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1},
-	};
-
 	int xMin = 0;
-	static int xMax = 15;
+	public int xMax = 15;
 	int yMin = 0;
-	static int yMax = 13;
+	public int yMax = 13;
 
-	private Transform[,] gameObjects = new Transform[xMax, yMax];
+	private int[,] level;
+	private Transform[,] gameObjects;
 
 	public List<Transform> tiles;
 
 	private int selectedTile = 0;
-	private bool toggleGrid = false;
+	private bool toggleGrid = true;
 	private bool deleteMode = false;
 
 	GameObject tileLevelParent;
@@ -74,7 +57,10 @@ public class LevelEditor : MonoBehaviour {
 		if (tileLevelParent == null) {
 			tileLevelParent = new GameObject ("TileLevel");
 		}
-		BuildLevel();
+		level = new int[xMax + 1, yMax + 1];
+		clearLevel ();
+		gameObjects = new Transform[xMax + 1, yMax + 1];
+		//BuildLevel();
 		enabled = true;
 
 		toCreate = tiles[0];
@@ -103,26 +89,43 @@ public class LevelEditor : MonoBehaviour {
 		return result;
 	}
 
-	void BuildLevel()
-	{
-		//Go through each element inside our level variable
-		for (int yPos = 0; yPos < level.Length; yPos++)
-		{
-			for (int xPos = 0; xPos < (level[yPos]).Length; xPos++)
-			{
-				CreateBlock(level[yPos][xPos], xPos, level.Length - yPos - 1);
+	void clearLevel() {
+		for ( int xPos = xMin; xPos <= xMax; xPos++){
+			for( int yPos = yMin; yPos <= yMax; yPos++){
+				level [xPos, yPos] = EMPTY;
 			}
 		}
 	}
+
+	private bool validPosition(int xPos, int yPos){
+		if (xPos < xMin || xPos > xMax || yPos < yMin || yPos > yMax) {
+			return false;
+		}
+		else{
+			return true;
+		}
+	}
+
+//	void BuildLevel()
+//	{
+//		//Go through each element inside our level variable
+//		for (int yPos = 0; yPos < level.Length; yPos++)
+//		{
+//			for (int xPos = 0; xPos < (level[yPos]).Length; xPos++)
+//			{
+//				CreateBlock(level[yPos][xPos], xPos, level.Length - yPos - 1);
+//			}
+//		}
+//	}
 
 	public void CreateBlock(int value, int xPos, int yPos)
 	{
 		Transform toCreate = null;
 		// We need to know the size of our level to save later
-		if (xPos < xMin || xPos > xMax || yPos < yMin || yPos > yMax) {
+		if (!validPosition(xPos, yPos)) {
 			return;
 		}
-		level [yPos] [xPos] = value;
+		level [xPos, yPos] = value;
 		// If the value is not -1 (empty) we 
 		if (value != -1) {
 			toCreate = tiles [value];
@@ -137,7 +140,7 @@ public class LevelEditor : MonoBehaviour {
 			// variable so it doesn't clutter our Hierarchy
 			newObject.parent = tileLevelParent.transform;
 
-			gameObjects [yPos, xPos] = newObject;
+			gameObjects [xPos, yPos] = newObject;
 		}
 	}
 
@@ -154,17 +157,22 @@ public class LevelEditor : MonoBehaviour {
 			// Deal with the mouse being not exactly on a block
 			int posX = Mathf.FloorToInt (pos.x + .5f);
 			int posY = Mathf.FloorToInt (pos.y + .5f);
+			if(!validPosition(posX, posY)){
+				return;
+			}
 			if (!deleteMode) {
+				print (posX);
+				print (posY);
 				print ("Selected tile: " + selectedTile);
-				print ("Currently on position " + level [posY] [posX]);
-				if (level [posY] [posX] == -1) {
+				print ("Currently on position " + level [posX, posY]);
+				if (level [posX, posY] == -1) {
 					CreateBlock (tiles.IndexOf (toCreate), posX, posY);
 				}
 				//If it's the same, just keep the previous one
-				else if (level [posY] [posX] == selectedTile) {
+				else if (level [posX, posY] == selectedTile) {
 					print ("Already there, yo");
 				} else {
-					DestroyImmediate (gameObjects [posY, posX].gameObject);
+					DestroyImmediate (gameObjects [posX, posY].gameObject);
 					CreateBlock (tiles.IndexOf (toCreate), posX, posY);
 				}
 			} else {
@@ -172,9 +180,9 @@ public class LevelEditor : MonoBehaviour {
 				//if ((Input.GetMouseButton (1) || Input.GetKeyDown (KeyCode.T)) && GUIUtility.hotControl == 0) {
 
 				// If we hit something (!= -1), we want to destroy it!
-				if (level [posY] [posX] != -1) {
-					DestroyImmediate (gameObjects [posY, posX].gameObject);
-					level [posY] [posX] = -1;
+				if (level [posX, posY] != -1) {
+					DestroyImmediate (gameObjects [posX, posY].gameObject);
+					level [posX, posY] = -1;
 				}
 			}
 		}
