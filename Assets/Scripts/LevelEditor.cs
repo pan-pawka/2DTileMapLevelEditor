@@ -126,8 +126,8 @@ public class LevelEditor : MonoBehaviour {
 			return;
 		}
 		level [xPos, yPos] = value;
-		// If the value is not -1 (empty) we 
-		if (value != -1) {
+		// If the value is not empty 
+		if (value != EMPTY) {
 			toCreate = tiles [value];
 		}
 		if (toCreate != null) {
@@ -165,7 +165,7 @@ public class LevelEditor : MonoBehaviour {
 				print (posY);
 				print ("Selected tile: " + selectedTile);
 				print ("Currently on position " + level [posX, posY]);
-				if (level [posX, posY] == -1) {
+				if (level [posX, posY] == EMPTY) {
 					CreateBlock (tiles.IndexOf (toCreate), posX, posY);
 				}
 				//If it's the same, just keep the previous one
@@ -179,10 +179,10 @@ public class LevelEditor : MonoBehaviour {
 				// Right clicking - Delete object
 				//if ((Input.GetMouseButton (1) || Input.GetKeyDown (KeyCode.T)) && GUIUtility.hotControl == 0) {
 
-				// If we hit something (!= -1), we want to destroy it!
-				if (level [posX, posY] != -1) {
+				// If we hit something (!= EMPTY), we want to destroy it!
+				if (level [posX, posY] != EMPTY) {
 					DestroyImmediate (gameObjects [posX, posY].gameObject);
-					level [posX, posY] = -1;
+					level [posX, posY] = EMPTY;
 				}
 			}
 		}
