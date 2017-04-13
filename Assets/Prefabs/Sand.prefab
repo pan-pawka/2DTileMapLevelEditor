@@ -21,7 +21,7 @@ GameObject:
   - 4: {fileID: 4000014026670902}
   - 212: {fileID: 212000010882142578}
   - 61: {fileID: 61000010035609812}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Sand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
