@@ -117,10 +117,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe68dddc1943d4bfcbd0a134ce7a81b4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  xMax: 15
+  yMax: 13
   tiles:
   - {fileID: 4000010041083728, guid: a92568fec274f43b497fd17d8b52b363, type: 2}
   - {fileID: 4000011169756728, guid: c5bf4424a05514be597de92e852ff421, type: 2}
   - {fileID: 4000014026670902, guid: e3f29ba18465146edbd2627d40551c81, type: 2}
+  - {fileID: 4000013102667656, guid: b34e418e5797844cfae30860de728df3, type: 2}
   deleteTexture: {fileID: 2800000, guid: ed684f9899399468a838363b7c67566b, type: 3}
 --- !u!4 &652277727
 Transform:

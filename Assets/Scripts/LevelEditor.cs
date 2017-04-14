@@ -18,13 +18,17 @@ public class LevelEditor : MonoBehaviour {
 	public int xMax = 15;
 	int yMin = 0;
 	public int yMax = 13;
+	int zMin = 0;
+	public int zMax = 10;
 
-	private int[,] level;
-	private Transform[,] gameObjects;
+	private int[, ,] level;
+	private Transform[, ,] gameObjects;
 
 	public List<Transform> tiles;
 
 	private int selectedTile = 0;
+	private int selectedLayer = 0;
+
 	private bool toggleGrid = true;
 	private bool deleteMode = false;
 
@@ -51,15 +55,13 @@ public class LevelEditor : MonoBehaviour {
 
 	public void Start()
 	{
-		// Get the DynamicObjects object so we can make it our
-		// newly created objects' parent
+		// Get the tileLevelParent object so we can make it our newly created objects' parent
 		tileLevelParent = GameObject.Find("TileLevel");
 		if (tileLevelParent == null) {
 			tileLevelParent = new GameObject ("TileLevel");
 		}
-		level = new int[xMax + 1, yMax + 1];
-		clearLevel ();
-		gameObjects = new Transform[xMax + 1, yMax + 1];
+		level = createEmptyLevel ();
+		gameObjects = new Transform[xMax + 1, yMax + 1, zMax + 1];
 		//BuildLevel();
 		enabled = true;
 
@@ -89,16 +91,30 @@ public class LevelEditor : MonoBehaviour {
 		return result;
 	}
 
+	int[, ,] createEmptyLevel(){
+		int[,,] level = new int[xMax + 1, yMax + 1, zMax + 1];
+		for (int xPos = xMin; xPos <= xMax; xPos++) {
+			for (int yPos = yMin; yPos <= yMax; yPos++) {
+				for (int zPos = zMin; zPos <= zMax; zPos++) {
+					level [xPos, yPos, zPos] = EMPTY;
+				}
+			}
+		}
+		return level;
+	}
+
 	void clearLevel() {
 		for ( int xPos = xMin; xPos <= xMax; xPos++){
-			for( int yPos = yMin; yPos <= yMax; yPos++){
-				level [xPos, yPos] = EMPTY;
+			for (int yPos = yMin; yPos <= yMax; yPos++) {
+				for (int zPos = zMin; zPos <= zMax; zPos++) {
+					level [xPos, yPos, zPos] = EMPTY;
+				}
 			}
 		}
 	}
 
-	private bool validPosition(int xPos, int yPos){
-		if (xPos < xMin || xPos > xMax || yPos < yMin || yPos > yMax) {
+	private bool validPosition(int xPos, int yPos, int zPos){
+		if (xPos < xMin || xPos > xMax || yPos < yMin || yPos > yMax || zPos < zMin || zPos > zMax) {
 			return false;
 		}
 		else{
@@ -118,20 +134,20 @@ public class LevelEditor : MonoBehaviour {
 //		}
 //	}
 
-	public void CreateBlock(int value, int xPos, int yPos)
+	public void CreateBlock(int value, int xPos, int yPos, int zPos)
 	{
 		Transform toCreate = null;
 		// We need to know the size of our level to save later
-		if (!validPosition(xPos, yPos)) {
+		if (!validPosition(xPos, yPos, zPos)) {
 			return;
 		}
-		level [xPos, yPos] = value;
+		level [xPos, yPos, zPos] = value;
 		// If the value is not empty 
 		if (value != EMPTY) {
 			toCreate = tiles [value];
 		}
 		if (toCreate != null) {
-			print ("Creating " + tiles [value].name + " on: (" + xPos + "," + yPos + ")");
+			print ("Creating " + tiles [value].name + " on: (" + xPos + "," + yPos + "," + zPos + ")");
 			//Create the object we want to create
 			Transform newObject = Instantiate (toCreate, new Vector3 (xPos, yPos, 0), Quaternion.identity) as Transform;
 			//Give the new object the same name as ours
@@ -140,7 +156,7 @@ public class LevelEditor : MonoBehaviour {
 			// variable so it doesn't clutter our Hierarchy
 			newObject.parent = tileLevelParent.transform;
 
-			gameObjects [xPos, yPos] = newObject;
+			gameObjects [xPos, yPos, zPos] = newObject;
 		}
 	}
 
@@ -157,32 +173,32 @@ public class LevelEditor : MonoBehaviour {
 			// Deal with the mouse being not exactly on a block
 			int posX = Mathf.FloorToInt (pos.x + .5f);
 			int posY = Mathf.FloorToInt (pos.y + .5f);
-			if(!validPosition(posX, posY)){
+			if(!validPosition(posX, posY, selectedLayer)){
 				return;
 			}
 			if (!deleteMode) {
 				print (posX);
 				print (posY);
 				print ("Selected tile: " + selectedTile);
-				print ("Currently on position " + level [posX, posY]);
-				if (level [posX, posY] == EMPTY) {
-					CreateBlock (tiles.IndexOf (toCreate), posX, posY);
+				print ("Currently on position " + level [posX, posY, selectedLayer]);
+				if (level [posX, posY, selectedLayer] == EMPTY) {
+					CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
 				}
 				//If it's the same, just keep the previous one
-				else if (level [posX, posY] == selectedTile) {
+				else if (level [posX, posY, selectedLayer] == selectedTile) {
 					print ("Already there, yo");
 				} else {
-					DestroyImmediate (gameObjects [posX, posY].gameObject);
-					CreateBlock (tiles.IndexOf (toCreate), posX, posY);
+					DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
+					CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
 				}
 			} else {
 				// Right clicking - Delete object
 				//if ((Input.GetMouseButton (1) || Input.GetKeyDown (KeyCode.T)) && GUIUtility.hotControl == 0) {
 
 				// If we hit something (!= EMPTY), we want to destroy it!
-				if (level [posX, posY] != EMPTY) {
-					DestroyImmediate (gameObjects [posX, posY].gameObject);
-					level [posX, posY] = EMPTY;
+				if (level [posX, posY, selectedLayer] != EMPTY) {
+					DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
+					level [posX, posY, selectedLayer] = EMPTY;
 				}
 			}
 		}
@@ -201,7 +217,7 @@ public class LevelEditor : MonoBehaviour {
 		toCreate = tiles [selectedTile];
 		GUILayout.EndArea ();
 
-		GUILayout.BeginArea (new Rect (10, 120, 100, 200));
+		GUILayout.BeginArea (new Rect (10, 120, 100, 300));
 		levelName = GUILayout.TextField (levelName);
 		if (GUILayout.Button ("Save")) {
 			SaveLevel ();
@@ -212,6 +228,14 @@ public class LevelEditor : MonoBehaviour {
 		}
 		if (GUILayout.Button ("Quit")) {
 			enabled = false;
+		}
+
+		GUILayout.Label ("Layer " + selectedLayer);
+		if (GUILayout.Button ("+ Layer")) {
+			selectedLayer = Mathf.Clamp (selectedLayer + 1, 0, 100);
+		}
+		if (GUILayout.Button ("- Layer")) {
+			selectedLayer = Mathf.Clamp (selectedLayer - 1, 0, 100);
 		}
 
 		toggleGrid = GUILayout.Toggle (toggleGrid, "Show Grid");
@@ -326,7 +350,7 @@ public class LevelEditor : MonoBehaviour {
 			string[] blockIDs = lines[i].Split (',');
 			for(int j = 0; j < blockIDs.Length - 1; j++)
 			{
-				CreateBlock(int.Parse(blockIDs[j]), j, lines.Count - i - 1);
+				CreateBlock(int.Parse(blockIDs[j]), j, lines.Count - i - 1, 0);
 			}
 		}
 	}
