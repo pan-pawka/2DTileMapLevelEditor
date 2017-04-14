@@ -119,6 +119,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   xMax: 15
   yMax: 13
+  zMax: 10
   tiles:
   - {fileID: 4000010041083728, guid: a92568fec274f43b497fd17d8b52b363, type: 2}
   - {fileID: 4000011169756728, guid: c5bf4424a05514be597de92e852ff421, type: 2}
