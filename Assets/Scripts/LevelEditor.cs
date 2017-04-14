@@ -271,9 +271,9 @@ public class LevelEditor : MonoBehaviour {
 					}
 					newLevel.Add (newRow);
 				}
-				if (layer != 0) {
+				//if (layer != 0) {
 					newLevel.Add ("\t");
-				}
+				//}
 			}
 		}
 
@@ -320,10 +320,14 @@ public class LevelEditor : MonoBehaviour {
 
 	public void LoadLevelFromStringLayers(string content){
 		List <string> layers = new List <string> (content.Split('\t'));
+		int layerCounter = 0;
 		foreach (string layer in layers) {
-			print ("Loaded Layer:");
-			print (layer);
-			LoadLevelFromString(layer);
+			if (layer.Trim () != "") {
+				print ("Loaded Layer " + layerCounter + ":");
+				print (layer);
+				LoadLevelFromString(layer);
+			}
+			layerCounter++;
 		}
 	}
 
