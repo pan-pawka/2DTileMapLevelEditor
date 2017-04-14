@@ -14,12 +14,9 @@ public class LevelEditor : MonoBehaviour {
 
 	const int EMPTY = -1;
 
-	int xMin = 0;
-	public int xMax = 15;
-	int yMin = 0;
-	public int yMax = 13;
-	int zMin = 0;
-	public int zMax = 10;
+	public int WIDTH = 16;
+	public int HEIGHT = 14;
+	public int LAYERS = 10;
 
 	private int[, ,] level;
 	private Transform[, ,] gameObjects;
@@ -61,7 +58,7 @@ public class LevelEditor : MonoBehaviour {
 			tileLevelParent = new GameObject ("TileLevel");
 		}
 		level = createEmptyLevel ();
-		gameObjects = new Transform[xMax + 1, yMax + 1, zMax + 1];
+		gameObjects = new Transform[WIDTH, HEIGHT, LAYERS];
 		//BuildLevel();
 		enabled = true;
 
@@ -92,10 +89,10 @@ public class LevelEditor : MonoBehaviour {
 	}
 
 	int[, ,] createEmptyLevel(){
-		int[,,] level = new int[xMax + 1, yMax + 1, zMax + 1];
-		for (int xPos = xMin; xPos <= xMax; xPos++) {
-			for (int yPos = yMin; yPos <= yMax; yPos++) {
-				for (int zPos = zMin; zPos <= zMax; zPos++) {
+		int[,,] level = new int[WIDTH, HEIGHT, LAYERS];
+		for (int xPos = 0; xPos < WIDTH; xPos++) {
+			for (int yPos = 0; yPos < HEIGHT; yPos++) {
+				for (int zPos = 0; zPos < LAYERS; zPos++) {
 					level [xPos, yPos, zPos] = EMPTY;
 				}
 			}
@@ -104,23 +101,36 @@ public class LevelEditor : MonoBehaviour {
 	}
 
 	void clearLevel() {
-		for ( int xPos = xMin; xPos <= xMax; xPos++){
-			for (int yPos = yMin; yPos <= yMax; yPos++) {
-				for (int zPos = zMin; zPos <= zMax; zPos++) {
-					level [xPos, yPos, zPos] = EMPTY;
+		for (int x = 0; x < WIDTH; x++){
+			for (int y = 0; y < HEIGHT; y++) {
+				for (int z = 0; z < LAYERS; z++) {
+					level [x, y, z] = EMPTY;
 				}
 			}
 		}
 	}
 
 	private bool validPosition(int xPos, int yPos, int zPos){
-		if (xPos < xMin || xPos > xMax || yPos < yMin || yPos > yMax || zPos < zMin || zPos > zMax) {
+		if (xPos < 0 || xPos >= WIDTH || yPos < 0 || yPos >= HEIGHT || zPos < 0 || zPos >= LAYERS) {
 			return false;
 		}
 		else{
 			return true;
 		}
 	}
+
+	private bool emptyLayer(int layer){
+		bool result = true;
+		for (int x = 0; x < WIDTH; x++){
+			for(int y = 0; y < HEIGHT; y++){
+				if(level[x, y, layer] != -1){
+					result = false;
+				}
+			}
+		}
+		return result;
+	}
+			
 
 //	void BuildLevel()
 //	{
@@ -177,16 +187,16 @@ public class LevelEditor : MonoBehaviour {
 				return;
 			}
 			if (!deleteMode) {
-				print (posX);
-				print (posY);
-				print ("Selected tile: " + selectedTile);
-				print ("Currently on position " + level [posX, posY, selectedLayer]);
+//				print (posX);
+//				print (posY);
+//				print ("Selected tile: " + selectedTile);
+//				print ("Currently on position " + level [posX, posY, selectedLayer]);
 				if (level [posX, posY, selectedLayer] == EMPTY) {
 					CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
 				}
 				//If it's the same, just keep the previous one
 				else if (level [posX, posY, selectedLayer] == selectedTile) {
-					print ("Already there, yo");
+					//print ("Already there, yo");
 				} else {
 					DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
 					CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
@@ -223,7 +233,7 @@ public class LevelEditor : MonoBehaviour {
 			SaveLevel ();
 		}
 		if (GUILayout.Button ("Load")) {
-			LoadLevelFile (levelName);
+			LoadLevelFile ();
 
 		}
 		if (GUILayout.Button ("Quit")) {
@@ -247,48 +257,28 @@ public class LevelEditor : MonoBehaviour {
 
 	void SaveLevel()
 	{
+		print(this.level.ToString ());
 		List<string> newLevel = new List<string> ();
-		for (int layer = 8; layer < 31; layer++) {
-			if (LayerMask.LayerToName (layer).Length > 0) {
-				for (int i = yMin; i <= yMax; i++) {
+		for (int layer = 0; layer < LAYERS; layer++) {
+			if (!emptyLayer(layer)) {
+				for (int y = 0; y < HEIGHT; y++) {
 					string newRow = "";
-					for (int j = xMin; j <= xMax; j++) {
-						Vector3 pos = new Vector3 (j, i, 0);
-						Ray ray = Camera.main.ScreenPointToRay (pos);
-						RaycastHit hit = new RaycastHit ();
-						Physics.Raycast (ray, out hit, 100);
-
-
-						//int l = 0;
-						// Will check if there is something hitting us within
-						// a distance of .1
-						//Collider[] hitColliders = Physics.OverlapSphere (pos, 0.1f);
-						Collider2D[] hitColliders2D = Physics2D.OverlapCircleAll (pos, 0.1f, (1 << layer));
-						if (hitColliders2D.Length > 0) {
-							// Do we have a tile with the same name as this object?
-							for (int k = 0; k < tiles.Count; k++) {
-								// If so, let's save that to the string
-								if (tiles [k].name == hitColliders2D [0].GetComponent<Collider2D> ().gameObject.name) {
-									newRow += (k + 1).ToString () + ",";
-								}
-							}
-						} else {
-							newRow += "0,";
-						}
+					for (int x = 0; x < WIDTH; x++) {
+						newRow += + level[x, y, layer] + ",";
 					}
-					if (i != yMin) {
+					if (y != 0) {
 						newRow += "\n";
 					}
 					newLevel.Add (newRow);
 				}
-				newLevel.Add ("\t");
+				if (layer != 0) {
+					newLevel.Add ("\t");
+				}
 			}
 		}
 
 		// Reverse the rows to make the final version rightside up
 		newLevel.Reverse ();
-		// Remove the first \n after the reversal (layers addition)
-		newLevel [0] = newLevel [0].Substring (1);
 		string levelComplete = "";
 		foreach (string level in newLevel) {
 			levelComplete += level;
@@ -307,7 +297,7 @@ public class LevelEditor : MonoBehaviour {
 		}
 	}
 
-	void LoadLevelFile(string level)
+	void LoadLevelFile()
 	{
 		// Destroy everything inside our currently level that's created
 		// dynamically
@@ -326,8 +316,6 @@ public class LevelEditor : MonoBehaviour {
 		}else {
 			print ("Failed to open level");
 		}
-		// Set our text object to the current level.
-		levelName = level;
 	}
 
 	public void LoadLevelFromStringLayers(string content){
