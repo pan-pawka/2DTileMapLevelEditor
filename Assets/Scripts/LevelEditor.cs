@@ -2,11 +2,12 @@
 using UnityEditor;
 using System.Collections;
 using System.Collections.Generic; // Lists
-//You must include these namespaces
-//to use BinaryFormatter
+//Include these namespaces to use BinaryFormatter
 using System;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+//Include for Unity UI
+using UnityEngine.UI;
 
 public class LevelEditor : MonoBehaviour {
 
@@ -14,8 +15,8 @@ public class LevelEditor : MonoBehaviour {
 
 	const int EMPTY = -1;
 
-	public int WIDTH = 16;
 	public int HEIGHT = 14;
+	public int WIDTH = 16;
 	public int LAYERS = 10;
 
 	private int[, ,] level;
@@ -31,6 +32,12 @@ public class LevelEditor : MonoBehaviour {
 
 	private GameObject tileLevelParent;
 	private Dictionary<int, GameObject> layerParents = new Dictionary<int, GameObject>();
+
+	private GameObject prefabParent;
+	public GameObject buttonPrefab;
+	private List<GameObject> PrefabButtons = new List<GameObject> ();
+	public int buttonHeight = 100;
+	public int buttonWidth = 100;
 
 	//The object we are currently looking to spawn
 	Transform toCreate;
@@ -64,6 +71,29 @@ public class LevelEditor : MonoBehaviour {
 		enabled = true;
 
 		toCreate = tiles[0];
+
+		prefabParent = GameObject.Find ("Prefabs");
+		prefabParent.GetComponent<GridLayoutGroup> ().cellSize = new Vector2 (buttonHeight, buttonWidth);
+
+		int tileCounter = 0;
+		foreach (Transform tile in tiles) {
+			int j = tileCounter;
+			GameObject button = Instantiate (buttonPrefab, Vector3.zero, Quaternion.identity) as GameObject;
+			button.name = tile.name;
+			button.GetComponent<Image> ().sprite = tile.gameObject.GetComponent<SpriteRenderer> ().sprite;
+			button.transform.SetParent(prefabParent.transform, false);
+			button.transform.localScale = new Vector3(0.8f,0.8f,0.8f);
+			button.GetComponent<Button>().onClick.AddListener( () => {ButtonClick(j);} );
+			PrefabButtons.Add (button);
+			tileCounter++;
+		}
+	}
+
+	private void ButtonClick (int tileIndex){
+		print("Button clicked: " + tileIndex + " = " + tiles[tileIndex].name);
+		print (toCreate);
+		toCreate = tiles [tileIndex];
+		print (toCreate);
 	}
 
 	private void ToggleDeleteCursor(){
@@ -202,11 +232,12 @@ public class LevelEditor : MonoBehaviour {
 //				print (posY);
 //				print ("Selected tile: " + selectedTile);
 //				print ("Currently on position " + level [posX, posY, selectedLayer]);
+				print("toCreate = " + toCreate + " with index " +  tiles.IndexOf (toCreate));
 				if (level [posX, posY, selectedLayer] == EMPTY) {
 					CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
 				}
 				//If it's the same, just keep the previous one
-				else if (level [posX, posY, selectedLayer] == selectedTile) {
+				else if (level [posX, posY, selectedLayer] == tiles.IndexOf (toCreate)) {
 					//print ("Already there, yo");
 				} else {
 					DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
@@ -227,16 +258,16 @@ public class LevelEditor : MonoBehaviour {
 
 	void OnGUI()
 	{
-		GUILayout.BeginArea (new Rect (Screen.width - 210, 20, 200, 800));
-		Texture[] GUItiles = new Texture[tiles.Count];
-		int i = 0;
-		foreach (Transform item in tiles) {
-			GUItiles [i] = item.gameObject.GetComponent<SpriteRenderer> ().sprite.texture;
-			i++;
-		}
-		selectedTile = GUILayout.SelectionGrid (selectedTile, (Texture[])GUItiles, 3);
-		toCreate = tiles [selectedTile];
-		GUILayout.EndArea ();
+//		GUILayout.BeginArea (new Rect (Screen.width - 210, 20, 200, 800));
+//		Texture[] GUItiles = new Texture[tiles.Count];
+//		int i = 0;
+//		foreach (Transform item in tiles) {
+//			GUItiles [i] = item.gameObject.GetComponent<SpriteRenderer> ().sprite.texture;
+//			i++;
+//		}
+//		selectedTile = GUILayout.SelectionGrid (selectedTile, (Texture[])GUItiles, 3);
+//		toCreate = tiles [selectedTile];
+//		GUILayout.EndArea ();
 
 		GUILayout.BeginArea (new Rect (10, 120, 100, 300));
 		levelName = GUILayout.TextField (levelName);
