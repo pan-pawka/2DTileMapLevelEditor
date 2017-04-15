@@ -29,8 +29,8 @@ public class MoveCamera : MonoBehaviour
 		if(Input.GetMouseButtonDown(0))
 		{
 			// Get mouse origin
-			mouseOrigin = Input.mousePosition;
-			isRotating = true;
+			//mouseOrigin = Input.mousePosition;
+			//isRotating = true;
 		}
 
 		// Get the right mouse button
@@ -45,8 +45,8 @@ public class MoveCamera : MonoBehaviour
 		if(Input.GetMouseButtonDown(2))
 		{
 			// Get mouse origin
-			mouseOrigin = Input.mousePosition;
-			isZooming = true;
+			//mouseOrigin = Input.mousePosition;
+			//isZooming = true;
 		}
 
 		// Disable movements on button release

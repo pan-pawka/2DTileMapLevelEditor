@@ -60,6 +60,9 @@ public class LevelEditor : MonoBehaviour {
 	{
 		GridOverlay.instance.SetGridSizeX (WIDTH);
 		GridOverlay.instance.SetGridSizeY (HEIGHT);
+
+		GameObject camera = GameObject.FindGameObjectWithTag ("MainCamera");
+		camera.transform.position = new Vector3 (WIDTH / 2, HEIGHT / 2, camera.transform.position.z);
 		// Get the tileLevelParent object so we can make it our newly created objects' parent
 		tileLevelParent = GameObject.Find("TileLevel");
 		if (tileLevelParent == null) {

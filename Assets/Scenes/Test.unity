@@ -1387,7 +1387,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   turnSpeed: 4
-  panSpeed: 4
+  panSpeed: 2
   zoomSpeed: 4
 --- !u!1 &789526339
 GameObject:
