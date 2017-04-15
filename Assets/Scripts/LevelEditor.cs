@@ -28,9 +28,6 @@ public class LevelEditor : MonoBehaviour {
 	private int selectedTile = 0;
 	private int selectedLayer = 0;
 
-	private bool toggleGrid = true;
-	private bool deleteMode = false;
-
 	private GameObject tileLevelParent;
 	private Dictionary<int, GameObject> layerParents = new Dictionary<int, GameObject>();
 
@@ -43,7 +40,6 @@ public class LevelEditor : MonoBehaviour {
 	//The object we are currently looking to spawn
 	Transform toCreate;
 
-	public Texture2D deleteTexture;
 	private Text LayerText;
 	private Text HelpText;
 	private GameObject LevelEditorPanel;
@@ -101,14 +97,6 @@ public class LevelEditor : MonoBehaviour {
 		print (toCreate);
 		toCreate = tiles [tileIndex];
 		print (toCreate);
-	}
-
-	private void ToggleDeleteCursor(){
-		if (deleteMode) {
-			Cursor.SetCursor (ScaleTexture (deleteTexture, 16, 16), Vector2.zero, CursorMode.Auto);
-		} else {
-			Cursor.SetCursor (null, Vector2.zero, CursorMode.Auto);
-		}
 	}
 
 
@@ -222,45 +210,43 @@ public class LevelEditor : MonoBehaviour {
 	{
 		if (enabled) {
 			SetLayerText ();
+			Vector3 mousePos = Input.mousePosition;
+			//Set the position in the z axis to the opposite of the
+			// camera's so that the position is on the world so
+			// ScreenToWorldPoint will give us valid values.
+			mousePos.z = Camera.main.transform.position.z * -1;
+			Vector3 pos = Camera.main.ScreenToWorldPoint (mousePos);
+			// Deal with the mouse being not exactly on a block
+			int posX = Mathf.FloorToInt (pos.x + .5f);
+			int posY = Mathf.FloorToInt (pos.y + .5f);
+			if (!ValidPosition (posX, posY, selectedLayer)) {
+				return;
+			}
 			// Left click - Create object
 			if (Input.GetMouseButton (0) && GUIUtility.hotControl == 0) {
-				Vector3 mousePos = Input.mousePosition;
-				//Set the position in the z axis to the opposite of the
-				// camera's so that the position is on the world so
-				// ScreenToWorldPoint will give us valid values.
-				mousePos.z = Camera.main.transform.position.z * -1;
-				Vector3 pos = Camera.main.ScreenToWorldPoint (mousePos);
-				// Deal with the mouse being not exactly on a block
-				int posX = Mathf.FloorToInt (pos.x + .5f);
-				int posY = Mathf.FloorToInt (pos.y + .5f);
-				if (!ValidPosition (posX, posY, selectedLayer)) {
-					return;
-				}
-				if (!deleteMode) {
+				
 //				print (posX);
 //				print (posY);
 //				print ("Selected tile: " + selectedTile);
 //				print ("Currently on position " + level [posX, posY, selectedLayer]);
-					print ("toCreate = " + toCreate + " with index " + tiles.IndexOf (toCreate));
-					if (level [posX, posY, selectedLayer] == EMPTY) {
-						CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
-					}
+				print ("toCreate = " + toCreate + " with index " + tiles.IndexOf (toCreate));
+				if (level [posX, posY, selectedLayer] == EMPTY) {
+					CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
+				}
 				//If it's the same, just keep the previous one
 				else if (level [posX, posY, selectedLayer] == tiles.IndexOf (toCreate)) {
-						//print ("Already there, yo");
-					} else {
-						DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
-						CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
-					}
+					//print ("Already there, yo");
 				} else {
-					// Right clicking - Delete object
-					//if ((Input.GetMouseButton (1) || Input.GetKeyDown (KeyCode.T)) && GUIUtility.hotControl == 0) {
-
-					// If we hit something (!= EMPTY), we want to destroy it!
-					if (level [posX, posY, selectedLayer] != EMPTY) {
-						DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
-						level [posX, posY, selectedLayer] = EMPTY;
-					}
+					DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
+					CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
+				}
+			}
+			// Right clicking - Delete object
+			if (Input.GetMouseButton (1) && GUIUtility.hotControl == 0) {
+				// If we hit something (!= EMPTY), we want to destroy it!
+				if (level [posX, posY, selectedLayer] != EMPTY) {
+					DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
+					level [posX, posY, selectedLayer] = EMPTY;
 				}
 			}
 		} else {
@@ -331,7 +317,7 @@ public class LevelEditor : MonoBehaviour {
 			levelComplete += level;
 		}
 		// This is the data we're going to be saving
-		print (levelComplete);
+		print ("Saving:\n" + levelComplete);
 		//Save to a file
 		BinaryFormatter bFormatter = new BinaryFormatter ();
 		string path = EditorUtility.SaveFilePanel("Save level", "", "LevelName", "lvl" );
@@ -344,23 +330,30 @@ public class LevelEditor : MonoBehaviour {
 		}
 	}
 
-	public void LoadLevel()
-	{
+	void ResetBeforeLoad(){
 		// Destroy everything inside our currently level that's created
 		// dynamically
 		foreach(Transform child in tileLevelParent.transform) {
 			Destroy(child.gameObject);
 		}
+		level = CreateEmptyLevel ();
+		layerParents = new Dictionary<int, GameObject>();
+	}
+
+	public void LoadLevel()
+	{
 		BinaryFormatter bFormatter = new BinaryFormatter();
 		string path = EditorUtility.OpenFilePanel("Open level", "", "lvl" );
 		if (path.Length != 0) {
+			ResetBeforeLoad ();
 			FileStream file = File.OpenRead (path);
 			// Convert the file from a byte array into a string
 			string levelData = bFormatter.Deserialize (file) as string;
+			print ("Loaded:\n" + levelData);
 			// We're done working with the file so we can close it
 			file.Close ();
 			LoadLevelFromStringLayers (levelData);
-		}else {
+		} else {
 			print ("Failed to open level");
 		}
 	}
@@ -371,8 +364,8 @@ public class LevelEditor : MonoBehaviour {
 		int layerCounter = 0;
 		foreach (string layer in layers) {
 			if (layer.Trim () != "") {
-				print ("First char? " + layer [0]);
-				print ("Loaded Layer " + layerCounter + ":");
+//				print ("First char? " + layer [0]);
+//				print ("Loaded Layer " + layerCounter + ":");
 				print (layer);
 //				string layerString = ("" + layer [0]) as string;
 				LoadLevelFromString(int.Parse(layer[0].ToString()), layer.Substring(1));
@@ -383,7 +376,7 @@ public class LevelEditor : MonoBehaviour {
 
 	void LoadLevelFromString(int layer, string content)
 	{
-		print ("Load content for layer " + layer + ":\n" + content);
+//		print ("Load content for layer " + layer + ":\n" + content);
 		// Split our string by the new lines (enter)
 		List <string> lines = new List <string> (content.Split('\n'));
 		// Place each block in order in the correct x and y position
