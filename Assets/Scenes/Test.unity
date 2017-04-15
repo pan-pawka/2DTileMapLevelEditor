@@ -1255,7 +1255,6 @@ MonoBehaviour:
     type: 2}
   buttonHeight: 70
   buttonWidth: 70
-  deleteTexture: {fileID: 2800000, guid: ed684f9899399468a838363b7c67566b, type: 3}
 --- !u!4 &652277727
 Transform:
   m_ObjectHideFlags: 0
@@ -1368,10 +1367,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2e4edcde7e5774c068f58eb689930152, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  showMain: 1
-  gridSizeX: 16
-  gridSizeY: 14
-  gridSizeZ: 0
   smallStep: 0.5
   largeStep: 1
   startX: 0

@@ -5,11 +5,9 @@ public class GridOverlay : MonoBehaviour {
 
 	public static GridOverlay instance = null;
 
-	public bool showMain = true;
-
-	public int gridSizeX;
-	public int gridSizeY;
-	public int gridSizeZ;
+	private int gridSizeX;
+	private int gridSizeY;
+	private int gridSizeZ;
 
 	public float smallStep;
 	public float largeStep;
@@ -38,7 +36,13 @@ public class GridOverlay : MonoBehaviour {
 		}
 	}
 
+	public void SetGridSizeX(int x){
+		gridSizeX = x;
+	}
 
+	public void SetGridSizeY(int y){
+		gridSizeY = y;
+	}
 
 	void Update () 
 	{
@@ -67,47 +71,38 @@ public class GridOverlay : MonoBehaviour {
 		}
 	}
 
-	void OnPostRender() 
+	void OnPostRender()
 	{        
 		// set the current material
-		lineMaterial.SetPass( 0 );
+		lineMaterial.SetPass (0);
 
-		GL.Begin( GL.LINES );
+		GL.Begin (GL.LINES);
 
-		if(showMain)
-		{
-			GL.Color(mainColor);
+		GL.Color (mainColor);
 
-			//Layers
-			for(float j = 0; j <= gridSizeY; j += largeStep)
-			{
-				//X axis lines
-				for(float i = 0; i <= gridSizeZ; i += largeStep)
-				{
-					GL.Vertex3( startX + offsetX, j + offsetY, startZ + i);
-					GL.Vertex3( gridSizeX + offsetX, j + offsetY, startZ + i);
-				}
-
-				//Z axis lines
-				for(float i = 0; i <= gridSizeX; i += largeStep)
-				{
-					GL.Vertex3( startX + i + offsetX, j + offsetY, startZ);
-					GL.Vertex3( startX + i + offsetX, j + offsetY, gridSizeZ);
-				}
+		//Layers
+		for (float j = 0; j <= gridSizeY; j += largeStep) {
+			//X axis lines
+			for (float i = 0; i <= gridSizeZ; i += largeStep) {
+				GL.Vertex3 (startX + offsetX, j + offsetY, startZ + i);
+				GL.Vertex3 (gridSizeX + offsetX, j + offsetY, startZ + i);
 			}
 
-			//Y axis lines
-			for(float i = 0; i <= gridSizeZ; i += largeStep)
-			{
-				for(float k = 0; k <= gridSizeX; k += largeStep)
-				{
-					GL.Vertex3( startX + k + offsetX, startY + offsetY, startZ + i);
-					GL.Vertex3( startX + k + offsetX, gridSizeY + offsetY, startZ + i);
-				}
+			//Z axis lines
+			for (float i = 0; i <= gridSizeX; i += largeStep) {
+				GL.Vertex3 (startX + i + offsetX, j + offsetY, startZ);
+				GL.Vertex3 (startX + i + offsetX, j + offsetY, gridSizeZ);
 			}
 		}
 
+		//Y axis lines
+		for (float i = 0; i <= gridSizeZ; i += largeStep) {
+			for (float k = 0; k <= gridSizeX; k += largeStep) {
+				GL.Vertex3 (startX + k + offsetX, startY + offsetY, startZ + i);
+				GL.Vertex3 (startX + k + offsetX, gridSizeY + offsetY, startZ + i);
+			}
+		}
 
-		GL.End();
+		GL.End ();
 	}
 }

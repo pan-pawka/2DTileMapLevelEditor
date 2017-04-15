@@ -58,6 +58,8 @@ public class LevelEditor : MonoBehaviour {
 
 	public void Start()
 	{
+		GridOverlay.instance.SetGridSizeX (WIDTH);
+		GridOverlay.instance.SetGridSizeY (HEIGHT);
 		// Get the tileLevelParent object so we can make it our newly created objects' parent
 		tileLevelParent = GameObject.Find("TileLevel");
 		if (tileLevelParent == null) {
@@ -100,19 +102,19 @@ public class LevelEditor : MonoBehaviour {
 	}
 
 
-	private Texture2D ScaleTexture(Texture2D source,int targetWidth,int targetHeight) {
-		Texture2D result = new Texture2D (targetWidth, targetHeight, source.format, false);
-//		float incX = (1.0f / (float)targetWidth);
-//		float incY = (1.0f / (float)targetHeight);
-		for (int i = 0; i < result.height; ++i) {
-			for (int j = 0; j < result.width; ++j) {
-				Color newColor = source.GetPixelBilinear ((float)j / (float)result.width, (float)i / (float)result.height);
-				result.SetPixel (j, i, newColor);
-			}
-		}
-		result.Apply ();
-		return result;
-	}
+//	private Texture2D ScaleTexture(Texture2D source,int targetWidth,int targetHeight) {
+//		Texture2D result = new Texture2D (targetWidth, targetHeight, source.format, false);
+////		float incX = (1.0f / (float)targetWidth);
+////		float incY = (1.0f / (float)targetHeight);
+//		for (int i = 0; i < result.height; ++i) {
+//			for (int j = 0; j < result.width; ++j) {
+//				Color newColor = source.GetPixelBilinear ((float)j / (float)result.width, (float)i / (float)result.height);
+//				result.SetPixel (j, i, newColor);
+//			}
+//		}
+//		result.Apply ();
+//		return result;
+//	}
 
 	int[, ,] CreateEmptyLevel(){
 		int[,,] level = new int[WIDTH, HEIGHT, LAYERS];
