@@ -29,7 +29,8 @@ public class LevelEditor : MonoBehaviour {
 	private bool toggleGrid = true;
 	private bool deleteMode = false;
 
-	GameObject tileLevelParent;
+	private GameObject tileLevelParent;
+	private Dictionary<int, GameObject> layerParents = new Dictionary<int, GameObject>();
 
 	//The object we are currently looking to spawn
 	Transform toCreate;
@@ -57,7 +58,7 @@ public class LevelEditor : MonoBehaviour {
 		if (tileLevelParent == null) {
 			tileLevelParent = new GameObject ("TileLevel");
 		}
-		level = createEmptyLevel ();
+		level = CreateEmptyLevel ();
 		gameObjects = new Transform[WIDTH, HEIGHT, LAYERS];
 		//BuildLevel();
 		enabled = true;
@@ -65,7 +66,7 @@ public class LevelEditor : MonoBehaviour {
 		toCreate = tiles[0];
 	}
 
-	private void toggleDeleteCursor(){
+	private void ToggleDeleteCursor(){
 		if (deleteMode) {
 			Cursor.SetCursor (ScaleTexture (deleteTexture, 16, 16), Vector2.zero, CursorMode.Auto);
 		} else {
@@ -88,7 +89,7 @@ public class LevelEditor : MonoBehaviour {
 		return result;
 	}
 
-	int[, ,] createEmptyLevel(){
+	int[, ,] CreateEmptyLevel(){
 		int[,,] level = new int[WIDTH, HEIGHT, LAYERS];
 		for (int xPos = 0; xPos < WIDTH; xPos++) {
 			for (int yPos = 0; yPos < HEIGHT; yPos++) {
@@ -100,7 +101,7 @@ public class LevelEditor : MonoBehaviour {
 		return level;
 	}
 
-	void clearLevel() {
+	void ClearLevel() {
 		for (int x = 0; x < WIDTH; x++){
 			for (int y = 0; y < HEIGHT; y++) {
 				for (int z = 0; z < LAYERS; z++) {
@@ -110,7 +111,7 @@ public class LevelEditor : MonoBehaviour {
 		}
 	}
 
-	private bool validPosition(int xPos, int yPos, int zPos){
+	private bool ValidPosition(int xPos, int yPos, int zPos){
 		if (xPos < 0 || xPos >= WIDTH || yPos < 0 || yPos >= HEIGHT || zPos < 0 || zPos >= LAYERS) {
 			return false;
 		}
@@ -119,7 +120,7 @@ public class LevelEditor : MonoBehaviour {
 		}
 	}
 
-	private bool emptyLayer(int layer){
+	private bool EmptyLayer(int layer){
 		bool result = true;
 		for (int x = 0; x < WIDTH; x++){
 			for(int y = 0; y < HEIGHT; y++){
@@ -129,6 +130,16 @@ public class LevelEditor : MonoBehaviour {
 			}
 		}
 		return result;
+	}
+
+	private GameObject GetLayerParent(int layer){
+//		print ("Getting layerParent for " + layer);
+		if (!layerParents.ContainsKey(layer)) {
+			GameObject layerParent = new GameObject ("Layer " + layer);
+			layerParent.transform.parent = tileLevelParent.transform;
+			layerParents.Add (layer, layerParent);
+		}
+		return layerParents [layer];
 	}
 			
 
@@ -148,7 +159,7 @@ public class LevelEditor : MonoBehaviour {
 	{
 		Transform toCreate = null;
 		// We need to know the size of our level to save later
-		if (!validPosition(xPos, yPos, zPos)) {
+		if (!ValidPosition(xPos, yPos, zPos)) {
 			return;
 		}
 		level [xPos, yPos, zPos] = value;
@@ -159,12 +170,12 @@ public class LevelEditor : MonoBehaviour {
 		if (toCreate != null) {
 			print ("Creating " + tiles [value].name + " on: (" + xPos + "," + yPos + "," + zPos + ")");
 			//Create the object we want to create
-			Transform newObject = Instantiate (toCreate, new Vector3 (xPos, yPos, 0), Quaternion.identity) as Transform;
+			Transform newObject = Instantiate (toCreate, new Vector3 (xPos, yPos, toCreate.position.z), Quaternion.identity) as Transform;
 			//Give the new object the same name as ours
 			newObject.name = toCreate.name;
 			// Set the object's parent to the DynamicObjects
 			// variable so it doesn't clutter our Hierarchy
-			newObject.parent = tileLevelParent.transform;
+			newObject.parent = GetLayerParent(zPos).transform;//tileLevelParent.transform;
 
 			gameObjects [xPos, yPos, zPos] = newObject;
 		}
@@ -183,7 +194,7 @@ public class LevelEditor : MonoBehaviour {
 			// Deal with the mouse being not exactly on a block
 			int posX = Mathf.FloorToInt (pos.x + .5f);
 			int posY = Mathf.FloorToInt (pos.y + .5f);
-			if(!validPosition(posX, posY, selectedLayer)){
+			if(!ValidPosition(posX, posY, selectedLayer)){
 				return;
 			}
 			if (!deleteMode) {
@@ -250,7 +261,7 @@ public class LevelEditor : MonoBehaviour {
 
 		toggleGrid = GUILayout.Toggle (toggleGrid, "Show Grid");
 		deleteMode = GUILayout.Toggle (deleteMode, "Delete Mode");
-		toggleDeleteCursor ();
+		ToggleDeleteCursor ();
 		GridOverlay.instance.enabled = toggleGrid;
 		GUILayout.EndArea ();
 	}
@@ -260,7 +271,7 @@ public class LevelEditor : MonoBehaviour {
 		print(this.level.ToString ());
 		List<string> newLevel = new List<string> ();
 		for (int layer = 0; layer < LAYERS; layer++) {
-			if (!emptyLayer(layer)) {
+			if (!EmptyLayer(layer)) {
 				for (int y = 0; y < HEIGHT; y++) {
 					string newRow = "";
 					for (int x = 0; x < WIDTH; x++) {
@@ -271,9 +282,7 @@ public class LevelEditor : MonoBehaviour {
 					}
 					newLevel.Add (newRow);
 				}
-				//if (layer != 0) {
-					newLevel.Add ("\t");
-				//}
+				newLevel.Add ("\t" + layer);
 			}
 		}
 
@@ -323,17 +332,19 @@ public class LevelEditor : MonoBehaviour {
 		int layerCounter = 0;
 		foreach (string layer in layers) {
 			if (layer.Trim () != "") {
+				print ("First char? " + layer [0]);
 				print ("Loaded Layer " + layerCounter + ":");
 				print (layer);
-				LoadLevelFromString(layer);
+//				string layerString = ("" + layer [0]) as string;
+				LoadLevelFromString(int.Parse(layer[0].ToString()), layer.Substring(1));
+				layerCounter++;
 			}
-			layerCounter++;
 		}
 	}
 
-	public void LoadLevelFromString(string content)
+	public void LoadLevelFromString(int layer, string content)
 	{
-		print ("Load content:\n" + content);
+		print ("Load content for layer " + layer + ":\n" + content);
 		// Split our string by the new lines (enter)
 		List <string> lines = new List <string> (content.Split('\n'));
 		// Place each block in order in the correct x and y position
@@ -342,7 +353,7 @@ public class LevelEditor : MonoBehaviour {
 			string[] blockIDs = lines[i].Split (',');
 			for(int j = 0; j < blockIDs.Length - 1; j++)
 			{
-				CreateBlock(int.Parse(blockIDs[j]), j, lines.Count - i - 1, 0);
+				CreateBlock(int.Parse(blockIDs[j]), j, lines.Count - i - 1, layer);
 			}
 		}
 	}
