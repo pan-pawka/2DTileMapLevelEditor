@@ -12,6 +12,7 @@ using UnityEngine.UI;
 public class LevelEditor : MonoBehaviour {
 
 	public static LevelEditor instance = null;
+	private bool enabled = true;
 
 	const int EMPTY = -1;
 
@@ -42,9 +43,10 @@ public class LevelEditor : MonoBehaviour {
 	//The object we are currently looking to spawn
 	Transform toCreate;
 
-	string levelName = "Temp";
-
 	public Texture2D deleteTexture;
+	private Text LayerText;
+	private Text HelpText;
+	private GameObject LevelEditorPanel;
 
 	void Awake()
 	{
@@ -87,6 +89,11 @@ public class LevelEditor : MonoBehaviour {
 			PrefabButtons.Add (button);
 			tileCounter++;
 		}
+
+		LayerText = GameObject.Find ("LayerText").GetComponent<Text> ();
+		HelpText = GameObject.Find ("HelpText").GetComponent<Text> ();
+		HelpText.enabled = false;
+		LevelEditorPanel = GameObject.Find ("LevelEditorPanel");
 	}
 
 	private void ButtonClick (int tileIndex){
@@ -213,91 +220,91 @@ public class LevelEditor : MonoBehaviour {
 
 	void Update()
 	{
-		// Left click - Create object
-		if (Input.GetMouseButton (0) && GUIUtility.hotControl == 0) {
-			Vector3 mousePos = Input.mousePosition;
-			//Set the position in the z axis to the opposite of the
-			// camera's so that the position is on the world so
-			// ScreenToWorldPoint will give us valid values.
-			mousePos.z = Camera.main.transform.position.z * -1;
-			Vector3 pos = Camera.main.ScreenToWorldPoint (mousePos);
-			// Deal with the mouse being not exactly on a block
-			int posX = Mathf.FloorToInt (pos.x + .5f);
-			int posY = Mathf.FloorToInt (pos.y + .5f);
-			if(!ValidPosition(posX, posY, selectedLayer)){
-				return;
-			}
-			if (!deleteMode) {
+		if (enabled) {
+			SetLayerText ();
+			// Left click - Create object
+			if (Input.GetMouseButton (0) && GUIUtility.hotControl == 0) {
+				Vector3 mousePos = Input.mousePosition;
+				//Set the position in the z axis to the opposite of the
+				// camera's so that the position is on the world so
+				// ScreenToWorldPoint will give us valid values.
+				mousePos.z = Camera.main.transform.position.z * -1;
+				Vector3 pos = Camera.main.ScreenToWorldPoint (mousePos);
+				// Deal with the mouse being not exactly on a block
+				int posX = Mathf.FloorToInt (pos.x + .5f);
+				int posY = Mathf.FloorToInt (pos.y + .5f);
+				if (!ValidPosition (posX, posY, selectedLayer)) {
+					return;
+				}
+				if (!deleteMode) {
 //				print (posX);
 //				print (posY);
 //				print ("Selected tile: " + selectedTile);
 //				print ("Currently on position " + level [posX, posY, selectedLayer]);
-				print("toCreate = " + toCreate + " with index " +  tiles.IndexOf (toCreate));
-				if (level [posX, posY, selectedLayer] == EMPTY) {
-					CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
-				}
+					print ("toCreate = " + toCreate + " with index " + tiles.IndexOf (toCreate));
+					if (level [posX, posY, selectedLayer] == EMPTY) {
+						CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
+					}
 				//If it's the same, just keep the previous one
 				else if (level [posX, posY, selectedLayer] == tiles.IndexOf (toCreate)) {
-					//print ("Already there, yo");
+						//print ("Already there, yo");
+					} else {
+						DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
+						CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
+					}
 				} else {
-					DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
-					CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
-				}
-			} else {
-				// Right clicking - Delete object
-				//if ((Input.GetMouseButton (1) || Input.GetKeyDown (KeyCode.T)) && GUIUtility.hotControl == 0) {
+					// Right clicking - Delete object
+					//if ((Input.GetMouseButton (1) || Input.GetKeyDown (KeyCode.T)) && GUIUtility.hotControl == 0) {
 
-				// If we hit something (!= EMPTY), we want to destroy it!
-				if (level [posX, posY, selectedLayer] != EMPTY) {
-					DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
-					level [posX, posY, selectedLayer] = EMPTY;
+					// If we hit something (!= EMPTY), we want to destroy it!
+					if (level [posX, posY, selectedLayer] != EMPTY) {
+						DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
+						level [posX, posY, selectedLayer] = EMPTY;
+					}
 				}
+			}
+		} else {
+			if (Input.GetKeyDown (KeyCode.Tab)) {
+				OpenLevelEditorPanel ();
 			}
 		}
 	}
 
-	void OnGUI()
+	public void ToggleGrid(bool enabled) 
 	{
-//		GUILayout.BeginArea (new Rect (Screen.width - 210, 20, 200, 800));
-//		Texture[] GUItiles = new Texture[tiles.Count];
-//		int i = 0;
-//		foreach (Transform item in tiles) {
-//			GUItiles [i] = item.gameObject.GetComponent<SpriteRenderer> ().sprite.texture;
-//			i++;
-//		}
-//		selectedTile = GUILayout.SelectionGrid (selectedTile, (Texture[])GUItiles, 3);
-//		toCreate = tiles [selectedTile];
-//		GUILayout.EndArea ();
-
-		GUILayout.BeginArea (new Rect (10, 120, 100, 300));
-		levelName = GUILayout.TextField (levelName);
-		if (GUILayout.Button ("Save")) {
-			SaveLevel ();
-		}
-		if (GUILayout.Button ("Load")) {
-			LoadLevelFile ();
-
-		}
-		if (GUILayout.Button ("Quit")) {
-			enabled = false;
-		}
-
-		GUILayout.Label ("Layer " + selectedLayer);
-		if (GUILayout.Button ("+ Layer")) {
-			selectedLayer = Mathf.Clamp (selectedLayer + 1, 0, 100);
-		}
-		if (GUILayout.Button ("- Layer")) {
-			selectedLayer = Mathf.Clamp (selectedLayer - 1, 0, 100);
-		}
-
-		toggleGrid = GUILayout.Toggle (toggleGrid, "Show Grid");
-		deleteMode = GUILayout.Toggle (deleteMode, "Delete Mode");
-		ToggleDeleteCursor ();
-		GridOverlay.instance.enabled = toggleGrid;
-		GUILayout.EndArea ();
+		GridOverlay.instance.enabled = enabled;
 	}
 
-	void SaveLevel()
+	void SetLayerText() 
+	{
+		LayerText.text = "Layer: " + selectedLayer;
+	}
+
+	public void LayerUp()
+	{
+		selectedLayer = Mathf.Clamp (selectedLayer + 1, 0, 100);
+	}
+
+	public void LayerDown() 
+	{
+		selectedLayer = Mathf.Clamp (selectedLayer - 1, 0, 100);
+	}
+
+	public void CloseLevelEditorPanel ()
+	{
+		enabled = false;
+		LevelEditorPanel.SetActive(false);
+		HelpText.enabled = true;
+	}
+
+	public void OpenLevelEditorPanel()
+	{
+		LevelEditorPanel.SetActive (true);
+		HelpText.enabled = false;
+		enabled = true;
+	}
+
+	public void SaveLevel()
 	{
 		print(this.level.ToString ());
 		List<string> newLevel = new List<string> ();
@@ -327,7 +334,7 @@ public class LevelEditor : MonoBehaviour {
 		print (levelComplete);
 		//Save to a file
 		BinaryFormatter bFormatter = new BinaryFormatter ();
-		string path = EditorUtility.SaveFilePanel("Save level", "", levelName, "lvl" );
+		string path = EditorUtility.SaveFilePanel("Save level", "", "LevelName", "lvl" );
 		if (path.Length != 0) {
 			FileStream file = File.Create (path);
 			bFormatter.Serialize (file, levelComplete);
@@ -337,7 +344,7 @@ public class LevelEditor : MonoBehaviour {
 		}
 	}
 
-	void LoadLevelFile()
+	public void LoadLevel()
 	{
 		// Destroy everything inside our currently level that's created
 		// dynamically
@@ -358,7 +365,8 @@ public class LevelEditor : MonoBehaviour {
 		}
 	}
 
-	public void LoadLevelFromStringLayers(string content){
+	void LoadLevelFromStringLayers(string content)
+	{
 		List <string> layers = new List <string> (content.Split('\t'));
 		int layerCounter = 0;
 		foreach (string layer in layers) {
@@ -373,7 +381,7 @@ public class LevelEditor : MonoBehaviour {
 		}
 	}
 
-	public void LoadLevelFromString(int layer, string content)
+	void LoadLevelFromString(int layer, string content)
 	{
 		print ("Load content for layer " + layer + ":\n" + content);
 		// Split our string by the new lines (enter)
