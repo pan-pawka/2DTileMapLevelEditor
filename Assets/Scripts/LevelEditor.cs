@@ -12,7 +12,7 @@ using UnityEngine.UI;
 public class LevelEditor : MonoBehaviour {
 
 	public static LevelEditor instance = null;
-	private bool enabled = true;
+	private bool scriptEnabled = true;
 
 	const int EMPTY = -1;
 
@@ -70,10 +70,8 @@ public class LevelEditor : MonoBehaviour {
 		}
 		level = CreateEmptyLevel ();
 		gameObjects = new Transform[WIDTH, HEIGHT, LAYERS];
-		//BuildLevel();
-		enabled = true;
 
-		toCreate = tiles[0];
+		toCreate = tiles[selectedTile];
 
 		prefabParent = GameObject.Find ("Prefabs");
 		prefabParent.GetComponent<GridLayoutGroup> ().cellSize = new Vector2 (buttonHeight, buttonWidth);
@@ -100,24 +98,10 @@ public class LevelEditor : MonoBehaviour {
 	private void ButtonClick (int tileIndex){
 		print("Button clicked: " + tileIndex + " = " + tiles[tileIndex].name);
 		print (toCreate);
+		selectedTile = tileIndex;
 		toCreate = tiles [tileIndex];
 		print (toCreate);
 	}
-
-
-//	private Texture2D ScaleTexture(Texture2D source,int targetWidth,int targetHeight) {
-//		Texture2D result = new Texture2D (targetWidth, targetHeight, source.format, false);
-////		float incX = (1.0f / (float)targetWidth);
-////		float incY = (1.0f / (float)targetHeight);
-//		for (int i = 0; i < result.height; ++i) {
-//			for (int j = 0; j < result.width; ++j) {
-//				Color newColor = source.GetPixelBilinear ((float)j / (float)result.width, (float)i / (float)result.height);
-//				result.SetPixel (j, i, newColor);
-//			}
-//		}
-//		result.Apply ();
-//		return result;
-//	}
 
 	int[, ,] CreateEmptyLevel(){
 		int[,,] level = new int[WIDTH, HEIGHT, LAYERS];
@@ -171,19 +155,6 @@ public class LevelEditor : MonoBehaviour {
 		}
 		return layerParents [layer];
 	}
-			
-
-//	void BuildLevel()
-//	{
-//		//Go through each element inside our level variable
-//		for (int yPos = 0; yPos < level.Length; yPos++)
-//		{
-//			for (int xPos = 0; xPos < (level[yPos]).Length; xPos++)
-//			{
-//				CreateBlock(level[yPos][xPos], xPos, level.Length - yPos - 1);
-//			}
-//		}
-//	}
 
 	public void CreateBlock(int value, int xPos, int yPos, int zPos)
 	{
@@ -213,7 +184,7 @@ public class LevelEditor : MonoBehaviour {
 
 	void Update()
 	{
-		if (enabled) {
+		if (scriptEnabled) {
 			SetLayerText ();
 			Vector3 mousePos = Input.mousePosition;
 			//Set the position in the z axis to the opposite of the
@@ -229,21 +200,15 @@ public class LevelEditor : MonoBehaviour {
 			}
 			// Left click - Create object
 			if (Input.GetMouseButton (0) && GUIUtility.hotControl == 0) {
-				
-//				print (posX);
-//				print (posY);
-//				print ("Selected tile: " + selectedTile);
-//				print ("Currently on position " + level [posX, posY, selectedLayer]);
-				print ("toCreate = " + toCreate + " with index " + tiles.IndexOf (toCreate));
 				if (level [posX, posY, selectedLayer] == EMPTY) {
-					CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
+					CreateBlock (selectedTile, posX, posY, selectedLayer);
 				}
 				//If it's the same, just keep the previous one
-				else if (level [posX, posY, selectedLayer] == tiles.IndexOf (toCreate)) {
+				else if (level [posX, posY, selectedLayer] == selectedTile) {
 					//print ("Already there, yo");
 				} else {
 					DestroyImmediate (gameObjects [posX, posY, selectedLayer].gameObject);
-					CreateBlock (tiles.IndexOf (toCreate), posX, posY, selectedLayer);
+					CreateBlock (selectedTile, posX, posY, selectedLayer);
 				}
 			}
 			// Right clicking - Delete object
@@ -283,7 +248,7 @@ public class LevelEditor : MonoBehaviour {
 
 	public void CloseLevelEditorPanel ()
 	{
-		enabled = false;
+		scriptEnabled = false;
 		LevelEditorPanel.SetActive(false);
 		HelpText.enabled = true;
 	}
@@ -292,7 +257,7 @@ public class LevelEditor : MonoBehaviour {
 	{
 		LevelEditorPanel.SetActive (true);
 		HelpText.enabled = false;
-		enabled = true;
+		scriptEnabled = true;
 	}
 
 	public void SaveLevel()

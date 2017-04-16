@@ -7,7 +7,7 @@ public class GridOverlay : MonoBehaviour {
 
 	private int gridSizeX;
 	private int gridSizeY;
-	private int gridSizeZ;
+	private int gridSizeZ = 0;
 
 	public float smallStep;
 	public float largeStep;
