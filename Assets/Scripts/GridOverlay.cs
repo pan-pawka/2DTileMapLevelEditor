@@ -5,16 +5,16 @@ public class GridOverlay : MonoBehaviour {
 
 	public static GridOverlay instance = null;
 
-	private int gridSizeX;
-	private int gridSizeY;
+	private int gridSizeX = 10;
+	private int gridSizeY = 10;
 	private int gridSizeZ = 0;
 
-	public float smallStep;
-	public float largeStep;
+	public float smallStep = 0.5f;
+	public float largeStep = 1;
 
-	public float startX;
-	public float startY;
-	public float startZ;
+	public float startX = 0;
+	public float startY = 0;
+	public float startZ = 0;
 
 	private float offsetX = -0.5f;
 	private float offsetY = -0.5f;
