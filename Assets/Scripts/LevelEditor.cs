@@ -128,7 +128,7 @@ public class LevelEditor : MonoBehaviour {
 			errorCounter++;
 			Debug.LogError ("Make sure there is a canvas GameObject present in the Hierary (Create UI/Canvas)");
 		}
-		GameObject levelEditorUI = Instantiate (levelEditorUIPrefab, canvas.transform);
+		GameObject levelEditorUI = Instantiate (levelEditorUIPrefab, canvas.transform) as GameObject;
 		// Hook up SaveLevel method to SaveButton
 		GameObject saveButton = GameObject.Find ("SaveButton");
 		if (saveButton == null) {
