@@ -212,7 +212,7 @@ public class LevelEditor : MonoBehaviour {
 		} else {
 			helpText.enabled = false;
 		}
-		// Instanciate the LevelEditorPanel
+		// Instantiate the LevelEditorPanel
 		levelEditorPanel = GameObject.Find ("LevelEditorPanel");
 		if (levelEditorPanel == null) {
 			errorCounter++;
