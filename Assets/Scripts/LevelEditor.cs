@@ -59,12 +59,16 @@ public class LevelEditor : MonoBehaviour {
 	//The object (tile) we are currently looking to spawn
 	Transform toCreate;
 
+	//------ UI ---------
+
+	// The parent object of the Level Editor UI as prefab
+	public GameObject levelEditorUIPrefab;
 	// Text used to represent the currently selected layer
-	private Text LayerText;
+	private Text layerText;
 	// Help text to instruct the user to reopen the level editor after closing it
-	private Text HelpText;
+	private Text helpText;
 	// The UI panel used to store the Level Editor options
-	private GameObject LevelEditorPanel;
+	private GameObject levelEditorPanel;
 
 	// Method to Instantiate the LevelEditor instance and keep it from destroying
 	void Awake()
@@ -116,6 +120,58 @@ public class LevelEditor : MonoBehaviour {
 			toCreate = tiles [selectedTile];
 		}
 
+		//------ UI ---------
+
+		// Instantiate the LevelEditorUI
+		GameObject canvas = GameObject.Find("Canvas");
+		if (canvas == null) {
+			errorCounter++;
+			Debug.LogError ("Make sure there is a canvas GameObject present in the Hierary (Create UI/Canvas)");
+		}
+		GameObject levelEditorUI = Instantiate (levelEditorUIPrefab, canvas.transform);
+		// Hook up SaveLevel method to SaveButton
+		GameObject saveButton = GameObject.Find ("SaveButton");
+		if (saveButton == null) {
+			errorCounter++;
+			Debug.LogError ("Make sure SaveButton is present");
+		}
+		saveButton.GetComponent<Button>().onClick.AddListener (SaveLevel);
+		// Hook up LoadLevel method to LoadButton
+		GameObject loadButton = GameObject.Find ("LoadButton");
+		if (loadButton == null) {
+			errorCounter++;
+			Debug.LogError ("Make sure LoadButton is present");
+		}
+		loadButton.GetComponent<Button>().onClick.AddListener (LoadLevel);
+		// Hook up ToggleGrid method to ToggleGrid
+		GameObject toggleGrid = GameObject.Find ("ToggleGrid");
+		if (toggleGrid == null) {
+			errorCounter++;
+			Debug.LogError ("Make sure ToggleGrid is present");
+		}
+		toggleGrid.GetComponent<Toggle>().onValueChanged.AddListener (ToggleGrid);
+		// Hook up LayerUp method to +LayerButton
+		GameObject plusLayerButton = GameObject.Find ("+LayerButton");
+		if (plusLayerButton == null) {
+			errorCounter++;
+			Debug.LogError ("Make sure +LayerButton is present");
+		}
+		plusLayerButton.GetComponent<Button>().onClick.AddListener (LayerUp);
+		// Hook up LayerDown method to -LayerButton
+		GameObject minusLayerButton = GameObject.Find ("-LayerButton");
+		if (minusLayerButton == null) {
+			errorCounter++;
+			Debug.LogError ("Make sure -LayerButton is present");
+		}
+		minusLayerButton.GetComponent<Button>().onClick.AddListener (LayerDown);
+		// Hook up CloseLevelEditorPanel method to CloseButton
+		GameObject closeButton = GameObject.Find ("CloseButton");
+		if (closeButton == null) {
+			errorCounter++;
+			Debug.LogError ("Make sure CloseButton is present");
+		}
+		closeButton.GetComponent<Button>().onClick.AddListener (CloseLevelEditorPanel);
+
 		// Find the prefabParent object and set the cellSize for the tile selection buttons
 		prefabParent = GameObject.Find ("Prefabs");
 		if (prefabParent == null || prefabParent.GetComponent<GridLayoutGroup> () == null) {
@@ -143,22 +199,22 @@ public class LevelEditor : MonoBehaviour {
 		}
 
 		// Instantiate the LayerText
-		LayerText = GameObject.Find ("LayerText").GetComponent<Text> ();
-		if (LayerText == null) {
+		layerText = GameObject.Find ("LayerText").GetComponent<Text> ();
+		if (layerText == null) {
 			errorCounter++;
 			Debug.LogError ("Make sure LevelEditorPrefab is present");
 		}
 		// Instantiate the HelpText
-		HelpText = GameObject.Find ("HelpText").GetComponent<Text> ();
-		if (HelpText == null) {
+		helpText = GameObject.Find ("HelpText").GetComponent<Text> ();
+		if (helpText == null) {
 			errorCounter++;
 			Debug.LogError ("Make sure LevelEditorPrefab is present");
 		} else {
-			HelpText.enabled = false;
+			helpText.enabled = false;
 		}
 		// Instanciate the LevelEditorPanel
-		LevelEditorPanel = GameObject.Find ("LevelEditorPanel");
-		if (LayerText == null) {
+		levelEditorPanel = GameObject.Find ("LevelEditorPanel");
+		if (levelEditorPanel == null) {
 			errorCounter++;
 			Debug.LogError ("Make sure LevelEditorPanel is present");
 		}
@@ -321,7 +377,7 @@ public class LevelEditor : MonoBehaviour {
 	// Method that updates the LayerText
 	void SetLayerText()
 	{
-		LayerText.text = "Layer: " + selectedLayer;
+		layerText.text = "Layer: " + selectedLayer;
 	}
 
 	// Method that increments the selected layer
@@ -340,15 +396,15 @@ public class LevelEditor : MonoBehaviour {
 	public void CloseLevelEditorPanel ()
 	{
 		scriptEnabled = false;
-		LevelEditorPanel.SetActive (false);
-		HelpText.enabled = true;
+		levelEditorPanel.SetActive (false);
+		helpText.enabled = true;
 	}
 
 	// Open the level editor panel, level editor mode
 	public void OpenLevelEditorPanel()
 	{
-		LevelEditorPanel.SetActive (true);
-		HelpText.enabled = false;
+		levelEditorPanel.SetActive (true);
+		helpText.enabled = false;
 		scriptEnabled = true;
 	}
 
