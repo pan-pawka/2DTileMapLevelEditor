@@ -1,0 +1,69 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1001 &100100000
+Prefab:
+  m_ObjectHideFlags: 1
+  serializedVersion: 2
+  m_Modification:
+    m_TransformParent: {fileID: 0}
+    m_Modifications: []
+    m_RemovedComponents: []
+  m_ParentPrefab: {fileID: 0}
+  m_RootGameObject: {fileID: 1275434589739012}
+  m_IsPrefabParent: 1
+--- !u!1 &1275434589739012
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 4476745195887002}
+  - component: {fileID: 114203227262763276}
+  m_Layer: 0
+  m_Name: LevelEditor
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4476745195887002
+Transform:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1275434589739012}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &114203227262763276
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1275434589739012}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe68dddc1943d4bfcbd0a134ce7a81b4, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  HEIGHT: 14
+  WIDTH: 16
+  LAYERS: 10
+  tiles:
+  - {fileID: 4000010041083728, guid: a92568fec274f43b497fd17d8b52b363, type: 2}
+  - {fileID: 4000011169756728, guid: c5bf4424a05514be597de92e852ff421, type: 2}
+  - {fileID: 4000014026670902, guid: e3f29ba18465146edbd2627d40551c81, type: 2}
+  - {fileID: 4000013102667656, guid: b34e418e5797844cfae30860de728df3, type: 2}
+  buttonPrefab: {fileID: 1000010740908782, guid: 993ac6289fda64f09b05ea526639da57,
+    type: 2}
+  buttonHeight: 70
+  buttonWidth: 70
+  buttonImageScale: 0.8
+  fileExtension: lvl
+  levelEditorUIPrefab: {fileID: 1524053510438940, guid: 48122aa6f7b904e62bea96e3225c5ee9,
+    type: 2}
