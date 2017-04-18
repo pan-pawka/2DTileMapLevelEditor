@@ -56,9 +56,11 @@ public class LevelEditor : MonoBehaviour {
 	// File extension used to save and load the levels
 	public string fileExtension = "lvl";
 
-	//The object (tile) we are currently looking to spawn
+	// The object (tile) we are currently looking to spawn
 	Transform toCreate;
 
+	// Boolean to determine whether to show all layers or only the current one
+	private bool onlyShowCurrentLayer = false;
 	//------ UI ---------
 
 	// The parent object of the Level Editor UI as prefab
@@ -129,6 +131,7 @@ public class LevelEditor : MonoBehaviour {
 			Debug.LogError ("Make sure there is a canvas GameObject present in the Hierary (Create UI/Canvas)");
 		}
 		GameObject levelEditorUI = Instantiate (levelEditorUIPrefab, canvas.transform) as GameObject;
+
 		// Hook up SaveLevel method to SaveButton
 		GameObject saveButton = GameObject.Find ("SaveButton");
 		if (saveButton == null) {
@@ -136,6 +139,7 @@ public class LevelEditor : MonoBehaviour {
 			Debug.LogError ("Make sure SaveButton is present");
 		}
 		saveButton.GetComponent<Button>().onClick.AddListener (SaveLevel);
+
 		// Hook up LoadLevel method to LoadButton
 		GameObject loadButton = GameObject.Find ("LoadButton");
 		if (loadButton == null) {
@@ -143,13 +147,15 @@ public class LevelEditor : MonoBehaviour {
 			Debug.LogError ("Make sure LoadButton is present");
 		}
 		loadButton.GetComponent<Button>().onClick.AddListener (LoadLevel);
-		// Hook up ToggleGrid method to ToggleGrid
-		GameObject toggleGrid = GameObject.Find ("ToggleGrid");
-		if (toggleGrid == null) {
+
+		// Hook up ToggleGrid method to GridToggle
+		GameObject gridToggle = GameObject.Find ("GridToggle");
+		if (gridToggle == null) {
 			errorCounter++;
-			Debug.LogError ("Make sure ToggleGrid is present");
+			Debug.LogError ("Make sure GridToggle is present");
 		}
-		toggleGrid.GetComponent<Toggle>().onValueChanged.AddListener (ToggleGrid);
+		gridToggle.GetComponent<Toggle>().onValueChanged.AddListener (ToggleGrid);
+
 		// Hook up LayerUp method to +LayerButton
 		GameObject plusLayerButton = GameObject.Find ("+LayerButton");
 		if (plusLayerButton == null) {
@@ -157,6 +163,7 @@ public class LevelEditor : MonoBehaviour {
 			Debug.LogError ("Make sure +LayerButton is present");
 		}
 		plusLayerButton.GetComponent<Button>().onClick.AddListener (LayerUp);
+
 		// Hook up LayerDown method to -LayerButton
 		GameObject minusLayerButton = GameObject.Find ("-LayerButton");
 		if (minusLayerButton == null) {
@@ -164,6 +171,15 @@ public class LevelEditor : MonoBehaviour {
 			Debug.LogError ("Make sure -LayerButton is present");
 		}
 		minusLayerButton.GetComponent<Button>().onClick.AddListener (LayerDown);
+
+		// Hook up ToggleOnlyShowCurrentLayer method to OnlyShowCurrentLayerToggle
+		GameObject onlyShowCurrentLayerToggle = GameObject.Find ("OnlyShowCurrentLayerToggle");
+		if (onlyShowCurrentLayerToggle == null) {
+			errorCounter++;
+			Debug.LogError ("Make sure OnlyShowCurrentLayerToggle is present");
+		}
+		onlyShowCurrentLayerToggle.GetComponent<Toggle>().onValueChanged.AddListener (ToggleOnlyShowCurrentLayer);
+
 		// Hook up CloseLevelEditorPanel method to CloseButton
 		GameObject closeButton = GameObject.Find ("CloseButton");
 		if (closeButton == null) {
@@ -384,12 +400,47 @@ public class LevelEditor : MonoBehaviour {
 	public void LayerUp()
 	{
 		selectedLayer = Mathf.Clamp (selectedLayer + 1, 0, 100);
+		UpdateLayerVisibility ();
 	}
 
 	// Method that decrements the selected layer
 	public void LayerDown()
 	{
 		selectedLayer = Mathf.Clamp (selectedLayer - 1, 0, 100);
+		UpdateLayerVisibility ();
+	}
+
+	public void ToggleOnlyShowCurrentLayer(bool onlyShow){
+		onlyShowCurrentLayer = onlyShow;
+		UpdateLayerVisibility ();
+	}
+		
+
+	// Method that updates which layers should be shown
+	public void UpdateLayerVisibility(){
+		if (onlyShowCurrentLayer) {
+			OnlyShowCurrentLayer ();
+		} else {
+			ShowAllLayers ();
+		}
+	}
+
+	// Method that enables/disables all layerParents
+	public void ToggleLayerParents(bool show){
+		foreach (GameObject layerParent in layerParents.Values) {
+			layerParent.SetActive (show);
+		}
+	}
+
+	// Method that enables all layers
+	public void ShowAllLayers(){
+		ToggleLayerParents (true);
+	}
+
+	// Method that disables all layers except the current one
+	public void OnlyShowCurrentLayer(){
+		ToggleLayerParents (false);
+		GetLayerParent (selectedLayer).SetActive (true);
 	}
 
 	// Close the level editor panel, test level mode
@@ -505,5 +556,6 @@ public class LevelEditor : MonoBehaviour {
 				CreateBlock (int.Parse (blockIDs [j]), j, lines.Count - i - 1, layer);
 			}
 		}
+		UpdateLayerVisibility ();
 	}
 }
