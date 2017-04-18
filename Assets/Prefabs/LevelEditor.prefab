@@ -65,5 +65,5 @@ MonoBehaviour:
   buttonWidth: 70
   buttonImageScale: 0.8
   fileExtension: lvl
-  levelEditorUIPrefab: {fileID: 1524053510438940, guid: 48122aa6f7b904e62bea96e3225c5ee9,
+  levelEditorUIPrefab: {fileID: 1060669001749680, guid: 02f4b844c3f284c7c8e8798c7be4f95f,
     type: 2}

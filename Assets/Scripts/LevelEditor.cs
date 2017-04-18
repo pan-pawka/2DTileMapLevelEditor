@@ -67,8 +67,8 @@ public class LevelEditor : MonoBehaviour {
 	public GameObject levelEditorUIPrefab;
 	// Text used to represent the currently selected layer
 	private Text layerText;
-	// Help text to instruct the user to reopen the level editor after closing it
-	private Text helpText;
+	// Open button to reopen the level editor after closing it
+	private GameObject openButton;
 	// The UI panel used to store the Level Editor options
 	private GameObject levelEditorPanel;
 
@@ -220,14 +220,16 @@ public class LevelEditor : MonoBehaviour {
 			errorCounter++;
 			Debug.LogError ("Make sure LevelEditorPrefab is present");
 		}
-		// Instantiate the HelpText
-		helpText = GameObject.Find ("HelpText").GetComponent<Text> ();
-		if (helpText == null) {
+		// Instantiate the OpenButton
+		openButton = GameObject.Find ("OpenButton");
+		if (openButton == null) {
 			errorCounter++;
-			Debug.LogError ("Make sure LevelEditorPrefab is present");
+			Debug.LogError ("Make sure OpenButton is present");
 		} else {
-			helpText.enabled = false;
+			openButton.SetActive(false);
+			openButton.GetComponent<Button>().onClick.AddListener (OpenLevelEditorPanel);
 		}
+
 		// Instantiate the LevelEditorPanel
 		levelEditorPanel = GameObject.Find ("LevelEditorPanel");
 		if (levelEditorPanel == null) {
@@ -376,12 +378,6 @@ public class LevelEditor : MonoBehaviour {
 				}
 			}
 		}
-		// If the script is not enabled, enabled it on TAB press
-		else {
-			if (Input.GetKeyDown (KeyCode.Tab)) {
-				OpenLevelEditorPanel ();
-			}
-		}
 	}
 
 	// Method that toggles the grid
@@ -448,14 +444,14 @@ public class LevelEditor : MonoBehaviour {
 	{
 		scriptEnabled = false;
 		levelEditorPanel.SetActive (false);
-		helpText.enabled = true;
+		openButton.SetActive(true);
 	}
 
 	// Open the level editor panel, level editor mode
 	public void OpenLevelEditorPanel()
 	{
 		levelEditorPanel.SetActive (true);
-		helpText.enabled = false;
+		openButton.SetActive(false);
 		scriptEnabled = true;
 	}
 
