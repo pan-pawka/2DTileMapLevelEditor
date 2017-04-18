@@ -410,11 +410,11 @@ public class LevelEditor : MonoBehaviour {
 		UpdateLayerVisibility ();
 	}
 
+	// Method that handles the UI toggle to only show the current layer
 	public void ToggleOnlyShowCurrentLayer(bool onlyShow){
 		onlyShowCurrentLayer = onlyShow;
 		UpdateLayerVisibility ();
 	}
-		
 
 	// Method that updates which layers should be shown
 	public void UpdateLayerVisibility(){
@@ -556,6 +556,7 @@ public class LevelEditor : MonoBehaviour {
 				CreateBlock (int.Parse (blockIDs [j]), j, lines.Count - i - 1, layer);
 			}
 		}
+		// Update to only show the correct layer(s)
 		UpdateLayerVisibility ();
 	}
 }
