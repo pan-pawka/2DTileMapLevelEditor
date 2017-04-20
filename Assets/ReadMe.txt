@@ -19,27 +19,27 @@ CONTENT:
 
 Materials:
 
--GridMaterial: material used to visualize the grid. Color can be changed in the LevelEditor script. 
+- GridMaterial: material used to visualize the grid. Color can be changed in the LevelEditor script. 
 
 Prefabs:
 
--ButtonPrefab: prefab used to represent the tiles in the editor. 
--LevelEditor: GameObject with the LevelEditor script attached to it.
--LevelEditorUI: the interface for the LevelEditor.
+- ButtonPrefab: prefab used to represent the tiles in the editor. 
+- LevelEditor: GameObject with the LevelEditor script attached to it.
+- LevelEditorUI: the interface for the LevelEditor.
 
 Scenes:
 
--Demo: a demo environment to demonstrate the tool
+- Demo: a demo environment to demonstrate the tool
 
 Scripts: 
 
--GridOverlay: the grid used to visualize the tiles (Credits: http://answers.unity3d.com/questions/482128/draw-grid-lines-in-game-view.html)
--LevelEditor: the logic that keeps track of changes and updates the interface (Credits: https://gist.github.com/JISyed/5017805)
--MoveCamera: allows the user to move the camera while using the level editor
+- GridOverlay: the grid used to visualize the tiles (Credits: http://answers.unity3d.com/questions/482128/draw-grid-lines-in-game-view.html)
+- LevelEditor: the logic that keeps track of changes and updates the interface (Credits: https://gist.github.com/JISyed/5017805)
+- MoveCamera: allows the user to move the camera while using the level editor
 
 Sprites:
 
-Sprites for testing. Credits to Kenney (www.kenney.nl).
+- Sprites for testing. Credits to Kenney (www.kenney.nl).
 
 ---------------------------------------
 
