@@ -74,4 +74,4 @@ CONTROLS:
 
 Online documentation:
 
-https://github.com/ratenbuuren/U2DLE
+https://github.com/GracesGames/2DLevelEditor
