@@ -65,7 +65,7 @@ public class GridOverlay : MonoBehaviour {
 			}
 			if(Input.GetKey(KeyCode.L))
 			{
-				offsetY += smallStep;
+				offsetX += smallStep;
 				lastScroll = Time.time;
 			}
 		}

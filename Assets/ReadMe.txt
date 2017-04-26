@@ -71,6 +71,7 @@ CONTROLS:
 - Left mouse to place tiles and select options
 - Right mouse to delete tiles
 - Right click and drag to move camera
+- IJKL to move grid
 
 Online documentation:
 
