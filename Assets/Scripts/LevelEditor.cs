@@ -1,12 +1,15 @@
 ﻿using UnityEngine;
 using UnityEditor;
 using System.Collections;
+
 // Include for Lists and Dictionaries
 using System.Collections.Generic;
+
 //Include these namespaces to use BinaryFormatter
 using System;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.IO;
+
 //Include for Unity UI
 using UnityEngine.UI;
 
@@ -35,7 +38,7 @@ public class LevelEditor : MonoBehaviour {
 	// Public so the user can add all user-created prefabs
 	public List<Transform> tiles;
 
-	// Used to keep score of the currently selected tile and layer
+	// Used to store the currently selected tile and layer
 	private int selectedTile = 0;
 	private int selectedLayer = 0;
 
@@ -56,12 +59,8 @@ public class LevelEditor : MonoBehaviour {
 	// File extension used to save and load the levels
 	public string fileExtension = "lvl";
 
-	// The object (tile) we are currently looking to spawn
-	Transform toCreate;
-
 	// Boolean to determine whether to show all layers or only the current one
 	private bool onlyShowCurrentLayer = false;
-	//------ UI ---------
 
 	// The parent object of the Level Editor UI as prefab
 	public GameObject levelEditorUIPrefab;
@@ -85,7 +84,7 @@ public class LevelEditor : MonoBehaviour {
 		DontDestroyOnLoad(gameObject);
 	}
 
-	// Method to Instantiate the dependencies and variables
+	// Method to instantiate the dependencies and variables
 	public void Start()
 	{
 		// Check the start values to prevent errors
@@ -114,14 +113,6 @@ public class LevelEditor : MonoBehaviour {
 		level = CreateEmptyLevel ();
 		gameObjects = new Transform[WIDTH, HEIGHT, LAYERS];
 
-		// Instantiate the toCreate object with the first tile
-		if (tiles.Count == 0) {
-			errorCounter++;
-			Debug.LogError ("Please add prefabs to the tiles array");
-		} else {
-			toCreate = tiles [selectedTile];
-		}
-
 		//------ UI ---------
 
 		// Instantiate the LevelEditorUI
@@ -130,7 +121,7 @@ public class LevelEditor : MonoBehaviour {
 			errorCounter++;
 			Debug.LogError ("Make sure there is a canvas GameObject present in the Hierary (Create UI/Canvas)");
 		}
-		GameObject levelEditorUI = Instantiate (levelEditorUIPrefab, canvas.transform) as GameObject;
+		Instantiate (levelEditorUIPrefab, canvas.transform);
 
 		// Hook up SaveLevel method to SaveButton
 		GameObject saveButton = GameObject.Find ("SaveButton");
@@ -201,7 +192,7 @@ public class LevelEditor : MonoBehaviour {
 		int tileCounter = 0;
 		//Create a button for each tile in tiles
 		foreach (Transform tile in tiles) {
-			int j = tileCounter;
+			int index = tileCounter;
 			GameObject button = Instantiate (buttonPrefab, Vector3.zero, Quaternion.identity) as GameObject;
 			button.name = tile.name;
 			button.GetComponent<Image> ().sprite = tile.gameObject.GetComponent<SpriteRenderer> ().sprite;
@@ -209,7 +200,7 @@ public class LevelEditor : MonoBehaviour {
 			button.transform.localScale = new Vector3 (buttonImageScale, buttonImageScale, buttonImageScale);
 			// Add a click handler to the button
 			button.GetComponent<Button> ().onClick.AddListener (() => {
-				ButtonClick (j);
+				ButtonClick (index);
 			});
 			tileCounter++;
 		}
@@ -238,6 +229,7 @@ public class LevelEditor : MonoBehaviour {
 		}
 	}
 
+	// Method that checks public variables values and sets them to valid defaults when necessary
 	private void CheckStartValues()
 	{
 		WIDTH = Mathf.Clamp (WIDTH, 1, WIDTH);
@@ -249,11 +241,10 @@ public class LevelEditor : MonoBehaviour {
 		fileExtension = fileExtension.Trim () == "" ? "lvl" : fileExtension;
 	}
 
-	// Method to switch toCreate block on tile selection
+	// Method to switch selectedTile on tile selection
 	private void ButtonClick (int tileIndex)
 	{
 		selectedTile = tileIndex;
-		toCreate = tiles [tileIndex];
 	}
 
 	// Method to create an empty level by looping through the Height, Width and Layers 
@@ -279,31 +270,6 @@ public class LevelEditor : MonoBehaviour {
 		} else {
 			return true;
 		}
-	}
-
-	// Method to determine whether a layer is empty
-	private bool EmptyLayer(int layer)
-	{
-		bool result = true;
-		for (int x = 0; x < WIDTH; x++) {
-			for (int y = 0; y < HEIGHT; y++) {
-				if (level [x, y, layer] != -1) {
-					result = false;
-				}
-			}
-		}
-		return result;
-	}
-
-	// Method that return the parent GameObject for a layer
-	private GameObject GetLayerParent(int layer)
-	{
-		if (!layerParents.ContainsKey (layer)) {
-			GameObject layerParent = new GameObject ("Layer " + layer);
-			layerParent.transform.parent = tileLevelParent.transform;
-			layerParents.Add (layer, layerParent);
-		}
-		return layerParents [layer];
 	}
 
 	// Method that creates a GameObject on click
@@ -437,6 +403,31 @@ public class LevelEditor : MonoBehaviour {
 	public void OnlyShowCurrentLayer(){
 		ToggleLayerParents (false);
 		GetLayerParent (selectedLayer).SetActive (true);
+	}
+
+	// Method to determine whether a layer is empty
+	private bool EmptyLayer(int layer)
+	{
+		bool result = true;
+		for (int x = 0; x < WIDTH; x++) {
+			for (int y = 0; y < HEIGHT; y++) {
+				if (level [x, y, layer] != -1) {
+					result = false;
+				}
+			}
+		}
+		return result;
+	}
+
+	// Method that return the parent GameObject for a layer
+	private GameObject GetLayerParent(int layer)
+	{
+		if (!layerParents.ContainsKey (layer)) {
+			GameObject layerParent = new GameObject ("Layer " + layer);
+			layerParent.transform.parent = tileLevelParent.transform;
+			layerParents.Add (layer, layerParent);
+		}
+		return layerParents [layer];
 	}
 
 	// Close the level editor panel, test level mode
