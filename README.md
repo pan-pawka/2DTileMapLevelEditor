@@ -62,12 +62,17 @@ Sprites:
 
 4. Choose the GridMaterial as the Line Material in the GridOverlay script component of the main camera
 
-5. Set the desired height, width and amount of layer in the LevelEditor prefab
-6. Add the level tiles (Prefab GameObjects) to the Tiles array in the LevelEditor prefab
-7. Attach the accompanied ButtonPrefab
-8. Set the desired dimensions for the tiles in the interface
-9. Specify a file extension to save and load the levels (default extension: lvl)
-10. Attach the accompanied LevelEditorUI
+5. Setup of the LevelEditor prefab settings:
+	- Set the desired height, width and amount of layer in the LevelEditor prefab
+	- Add the prefab test tiles or your own files to the Tiles array
+	- Attach the accompanied ButtonPrefab
+	- Set the desired dimensions for the tiles in the interface
+	- Specify a file extension to save and load the levels (default extension: lvl)
+	- Attach the accompanied LevelEditorUI
+	
+6. Set the Game Mode aspect ratio to 16:9
+
+7. Hit the play button
 
 ---------------------------------------
 
