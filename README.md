@@ -1,12 +1,12 @@
-# 2DLevelEditor
+# 2DTileMapLevelEditor
 
-2D Level Editor for Unity
+2D Tile Map Level Editor for Unity
 
 ![Example](https://github.com/GracesGames/2DLevelEditor/blob/master/Images/2DLE%20Preview.png)
 
-This package allows the user to add a simple 2D Level Editor to their game.  
+This package allows the user to add a simple 2D Tile Map Level Editor to their game.  
 
-The 2D Level Editor allows users to create levels intuitively and fast while also allowing players to create and share their own levels.
+The 2D Tile Map Level Editor allows users to create levels intuitively and fast while also allowing players to create and share their own levels.
 
 ## Features:
 
